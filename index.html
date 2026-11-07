@@ -141,6 +141,20 @@ footer{background:#071127;color:#8fa0c2;text-align:center;font-size:13px;padding
 .sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(11,26,58,.94);backdrop-filter:blur(8px);display:flex;justify-content:center;gap:14px;align-items:center;color:#fff;font:700 14px/1.4 var(--serif)}
 .sticky .btn{padding:14px 26px;font-size:16px}
 @media(max-width:420px){.sticky span{display:none}}
+
+/* MOTION */
+@keyframes heroIn{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.himg img{animation:heroIn 1.4s ease-out both}
+.hinfo>*{animation:fadeUp .9s ease-out both}
+.hinfo>*:nth-child(1){animation-delay:.5s}.hinfo>*:nth-child(2){animation-delay:.7s}.hinfo>*:nth-child(3){animation-delay:.9s}
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg);animation:shine 3.6s ease-in-out infinite;pointer-events:none}
+.js .rv{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.js .sticky{transform:translateY(110%);transition:transform .4s ease}
+.js .sticky.on{transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -188,8 +202,8 @@ footer{background:#071127;color:#8fa0c2;text-align:center;font-size:13px;padding
   <div class="wrap">
     <h2>登壇者・大嶋啓介</h2>
     <div class="stats">
-      <div class="stat"><div class="n">100<small>校+</small></div><p>高校野球のチーム強化研修に関わった学校数</p></div>
-      <div class="stat"><div class="n">25<small>校</small></div><p>そのうち甲子園出場を果たした学校</p></div>
+      <div class="stat"><div class="n"><span data-count="100">100</span><small>校+</small></div><p>高校野球のチーム強化研修に関わった学校数</p></div>
+      <div class="stat"><div class="n"><span data-count="25">25</span><small>校</small></div><p>そのうち甲子園出場を果たした学校</p></div>
       <div class="stat"><div class="n">金</div><p>北京オリンピック 女子ソフトボール代表の朝礼研修に関わり、金メダルに貢献</p></div>
     </div>
     <ul class="list">
@@ -266,6 +280,32 @@ footer{background:#071127;color:#8fa0c2;text-align:center;font-size:13px;padding
   var el=document.getElementById('left');if(!el)return;
   var end=new Date('2026-11-07T23:59:59+09:00'),d=Math.ceil((end-new Date())/864e5);
   el.textContent=d>0?'あと'+d+'日':(d===0?'本日まで':'受付終了');
+})();
+
+(function(){
+  var d=document.documentElement;d.classList.add('js');
+  var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var els=document.querySelectorAll('.ben,.stat,.list li,.profile,.why .quote,.why p,.card,.what h2,.speaker h2,.why h2,.info h2,.for-h,.def,.cta h2,.cta p,.info dl div');
+  function count(el){
+    var n=+el.getAttribute('data-count');if(!n||rm)return;
+    var t0=null;function f(t){if(!t0)t0=t;var k=Math.min((t-t0)/1200,1);el.textContent=Math.round(n*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)}
+    el.textContent='0';requestAnimationFrame(f);
+  }
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return}
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){
+    if(!en.isIntersecting)return;
+    en.target.classList.add('in');
+    en.target.querySelectorAll('[data-count]').forEach(count);
+    io.unobserve(en.target);
+  })},{threshold:.15});
+  els.forEach(function(el){
+    el.classList.add('rv');
+    var i=Array.prototype.indexOf.call(el.parentNode.children,el);
+    el.style.transitionDelay=Math.min(i,5)*70+'ms';
+    io.observe(el);
+  });
+  var hb=document.querySelector('.hero .btn'),sk=document.querySelector('.sticky');
+  if(hb&&sk){new IntersectionObserver(function(es){sk.classList.toggle('on',!es[0].isIntersecting)}).observe(hb)}
 })();
 </script>
 </body>
